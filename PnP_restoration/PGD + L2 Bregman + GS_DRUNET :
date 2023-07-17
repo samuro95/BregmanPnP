@@ -1,0 +1,18 @@
+PGD + L2 Bregman + GS_DRUNET : (Results CBSD68 running 384079-tmux0)
+
+alpha 5 : lamb 0.03 / sigma 0.05
+alpha 10 : lamb 0.02 / sigma 0.02
+alpha 20 : lamb 0.03 / sigma 0.03
+alpha 40 : lamb 0.03 / sigma 0.02
+alpha 60 : lamb 0.03 / sigma 0.02
+
+PGD + Burg Bregman + GS_DRUNET : OK
+
+alpha 5 : lamb 0.05 / sigma 0.05
+alpha 10 : lamb 0.1 / sigma 0.05
+alpha 20 : lamb 0.2 / sigma 0.05
+alpha 40 : lamb 0.2 / sigma 0.05
+alpha 60 : lamb 0.2 / sigma 0.03
+
+
+

@@ -1,0 +1,35 @@
+program: deblur.py
+method: grid
+parameters:
+  PnP_algo : 
+    values: ['GD']
+  noise_model :
+    values: ['poisson']
+  bregman_potential:
+    values: ['burg']
+  dataset_name : 
+    values: ['CBSD68']
+  alpha_poisson:
+    values: [10]
+  # lamb_pre_init: 
+  #   values: [0.5,1.,1.5,2.]
+  # lamb: 
+  #   values: [0.5,0.75,1.]
+  # sigma_denoiser_pre_init:
+  #   values: [50]
+  # sigma_denoiser :
+  #   values: [50]
+  # stepsize_pre_init:
+  #   values: [1.]
+  # stepsize:
+  #   values: [1.]
+  maxitr:
+    values: [500]
+  thres_conv:
+    values: [1e-7]
+
+
+
+
+  
+    
