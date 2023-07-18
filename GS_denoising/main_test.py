@@ -9,15 +9,14 @@ from argparse import ArgumentParser
 import random
 import torch
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # PROGRAM args
     parser = ArgumentParser()
-    parser.add_argument('--name', type=str, default='my_test')
-    parser.add_argument('--save_images', dest='save_images', action='store_true')
+    parser.add_argument("--name", type=str, default="my_test")
+    parser.add_argument("--save_images", dest="save_images", action="store_true")
     parser.set_defaults(save_images=False)
-    parser.add_argument('--log_folder', type=str, default='logs')
-    
+    parser.add_argument("--log_folder", type=str, default="logs")
 
     # MODEL args
     parser = GradMatch.add_model_specific_args(parser)
@@ -32,7 +31,7 @@ if __name__ == '__main__':
 
     if not os.path.exists(hparams.log_folder):
         os.mkdir(hparams.log_folder)
-    log_path = hparams.log_folder + '/' + hparams.name
+    log_path = hparams.log_folder + "/" + hparams.name
     if not os.path.exists(log_path):
         os.mkdir(log_path)
     tb_logger = pl_loggers.TensorBoardLogger(log_path)
@@ -43,12 +42,14 @@ if __name__ == '__main__':
     model.test_dataloader = dm.val_dataloader
 
     checkpoint = torch.load(hparams.pretrained_checkpoint)
-    model.load_state_dict(checkpoint['state_dict'],strict=False)
+    model.load_state_dict(checkpoint["state_dict"], strict=False)
 
-    trainer = pl.Trainer(logger=tb_logger,gpus=-1,precision=32, accelerator="gpu", strategy="ddp")
+    trainer = pl.Trainer(
+        logger=tb_logger,
+        devices="auto",
+        precision=32,
+        accelerator="gpu",
+        strategy="ddp",
+    )
 
     trainer.test(model)
-
-
-
-

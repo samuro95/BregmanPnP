@@ -25,7 +25,7 @@ Reference:
 # FFDNet
 # --------------------------------------------
 class FFDNet(nn.Module):
-    def __init__(self, in_nc=1, out_nc=1, nc=64, nb=15, act_mode='R'):
+    def __init__(self, in_nc=1, out_nc=1, nc=64, nb=15, act_mode="R"):
         """
         # ------------------------------------
         in_nc: channel number of input
@@ -42,9 +42,9 @@ class FFDNet(nn.Module):
 
         self.m_down = B.PixelUnShuffle(upscale_factor=sf)
 
-        m_head = B.conv(in_nc * sf * sf + 1, nc, mode='C' + act_mode[-1], bias=bias)
-        m_body = [B.conv(nc, nc, mode='C' + act_mode, bias=bias) for _ in range(nb - 2)]
-        m_tail = B.conv(nc, out_nc * sf * sf, mode='C', bias=bias)
+        m_head = B.conv(in_nc * sf * sf + 1, nc, mode="C" + act_mode[-1], bias=bias)
+        m_body = [B.conv(nc, nc, mode="C" + act_mode, bias=bias) for _ in range(nb - 2)]
+        m_tail = B.conv(nc, out_nc * sf * sf, mode="C", bias=bias)
 
         self.model = B.sequential(m_head, *m_body, m_tail)
 
@@ -56,7 +56,7 @@ class FFDNet(nn.Module):
         paddingRight = int(np.ceil(w / 2) * 2 - w)
         x = torch.nn.ReplicationPad2d((0, paddingRight, 0, paddingBottom))(x)
         x = self.m_down(x)
-        #m = torch.ones(sigma.size()[0], sigma.size()[1], x.size()[-2], x.size()[-1]).type_as(x).mul(sigma)
+        # m = torch.ones(sigma.size()[0], sigma.size()[1], x.size()[-2], x.size()[-1]).type_as(x).mul(sigma)
         m = sigma.repeat(1, 1, x.size()[-2], x.size()[-1])
         x = torch.cat((x, m), 1)
 
@@ -67,10 +67,10 @@ class FFDNet(nn.Module):
         return x
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from utils import utils_model
 
-    model = FFDNet(in_nc=1, out_nc=1, nc=64, nb=15, act_mode='R')
+    model = FFDNet(in_nc=1, out_nc=1, nc=64, nb=15, act_mode="R")
     print(utils_model.describe_model(model))
 
     x = torch.randn((2, 1, 240, 240))
@@ -79,5 +79,3 @@ if __name__ == '__main__':
     print(x.shape)
 
     #  run models/network_ffdnet.py
-
-

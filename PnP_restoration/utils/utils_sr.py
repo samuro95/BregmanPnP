@@ -10,19 +10,19 @@ import scipy.io as io
 import scipy
 import torch.nn.functional as F
 
-'''
+"""
 Modified from  Kai Zhang's code (github: https://github.com/cszn)
-'''
+"""
 
-'''
+"""
 # =================
 # pytorch
 # =================
-'''
+"""
 
 
 def splits(a, sf):
-    '''split a into sfxsf distinct blocks
+    """split a into sfxsf distinct blocks
 
     Args:
         a: NxCxWxHx2
@@ -30,7 +30,7 @@ def splits(a, sf):
 
     Returns:
         b: NxCx(W/sf)x(H/sf)x2x(sf^2)
-    '''
+    """
     b = torch.stack(torch.chunk(a, sf, dim=2), dim=5)
     b = torch.cat(torch.chunk(b, sf, dim=3), dim=5)
     return b
@@ -74,7 +74,7 @@ def cabs2(x):
 
 
 def cmul(t1, t2):
-    '''complex multiplication
+    """complex multiplication
 
     Args:
         t1: NxCxHxWx2, complex tensor
@@ -82,21 +82,23 @@ def cmul(t1, t2):
 
     Returns:
         output: NxCxHxWx2
-    '''
+    """
     real1, imag1 = t1[..., 0], t1[..., 1]
     real2, imag2 = t2[..., 0], t2[..., 1]
-    return torch.stack([real1 * real2 - imag1 * imag2, real1 * imag2 + imag1 * real2], dim=-1)
+    return torch.stack(
+        [real1 * real2 - imag1 * imag2, real1 * imag2 + imag1 * real2], dim=-1
+    )
 
 
 def cconj(t, inplace=False):
-    '''complex's conjugation
+    """complex's conjugation
 
     Args:
         t: NxCxHxWx2
 
     Returns:
         output: NxCxHxWx2
-    '''
+    """
     c = t.clone() if not inplace else t
     c[..., 1] *= -1
     return c
@@ -113,7 +115,7 @@ def ifft(t):
 
 
 def p2o(psf, shape):
-    '''
+    """
     Convert point-spread function to optical transfer function.
     otf = p2o(psf) computes the Fast Fourier Transform (FFT) of the
     point-spread function (PSF) array and creates the optical transfer
@@ -125,43 +127,51 @@ def p2o(psf, shape):
 
     Returns:
         otf: NxCxHxWx2
-    '''
+    """
     otf = torch.zeros(psf.shape[:-2] + shape).type_as(psf)
-    otf[..., :psf.shape[2], :psf.shape[3]].copy_(psf)
+    otf[..., : psf.shape[2], : psf.shape[3]].copy_(psf)
     for axis, axis_size in enumerate(psf.shape[2:]):
         otf = torch.roll(otf, -int(axis_size / 2), dims=axis + 2)
-    #otf = torch.rfft(otf, 2, onesided=False)
+    # otf = torch.rfft(otf, 2, onesided=False)
     otf = fft(otf)
-    n_ops = torch.sum(torch.tensor(psf.shape).type_as(psf) * torch.log2(torch.tensor(psf.shape).type_as(psf)))
-    otf[..., 1][torch.abs(otf[..., 1]) < n_ops * 2.22e-16] = torch.tensor(0).type_as(psf)
+    n_ops = torch.sum(
+        torch.tensor(psf.shape).type_as(psf)
+        * torch.log2(torch.tensor(psf.shape).type_as(psf))
+    )
+    otf[..., 1][torch.abs(otf[..., 1]) < n_ops * 2.22e-16] = torch.tensor(0).type_as(
+        psf
+    )
     return otf
 
 
 def upsample(x, sf=3):
-    '''s-fold upsampler
+    """s-fold upsampler
 
     Upsampling the spatial size by filling the new entries with zeros
 
     x: tensor image, NxCxWxH
-    '''
+    """
     st = 0
-    z = torch.zeros((x.shape[0], x.shape[1], x.shape[2] * sf, x.shape[3] * sf)).type_as(x)
+    z = torch.zeros((x.shape[0], x.shape[1], x.shape[2] * sf, x.shape[3] * sf)).type_as(
+        x
+    )
     z[..., st::sf, st::sf].copy_(x)
     return z
 
 
 def downsample(x, sf=3):
-    '''s-fold downsampler
+    """s-fold downsampler
 
     Keeping the upper-left pixel for each distinct sfxsf patch and discarding the others
 
     x: tensor image, NxCxWxH
-    '''
+    """
     st = 0
     return x[..., st::sf, st::sf]
 
+
 def G(x, k, sf=3):
-    '''
+    """
     x: image, NxcxHxW
     k: kernel, hxw
     sf: scale factor
@@ -169,13 +179,13 @@ def G(x, k, sf=3):
     Matlab function:
     tmp = imfilter(x,h,'circular');
     y = downsample2(tmp,K);
-    '''
+    """
     x = downsample(imfilter(x, k), sf=sf)
     return x
 
 
 def Gt(x, k, sf=3):
-    '''
+    """
     x: image, NxcxHxW
     k: kernel, hxw
     sf: scale factor
@@ -183,13 +193,13 @@ def Gt(x, k, sf=3):
     Matlab function:
     tmp = upsample2(x,K);
     y = imfilter(tmp,h,'circular');
-    '''
-    x = imfilter(upsample(x, sf=sf),k, transposed=True)
+    """
+    x = imfilter(upsample(x, sf=sf), k, transposed=True)
     return x
 
 
 def pre_calculate_prox(x, k, sf):
-    '''
+    """
     Args:
         x: NxCxHxW, LR input
         k: hxw
@@ -198,7 +208,7 @@ def pre_calculate_prox(x, k, sf):
     Returns:
         FB, FBC, F2B, FBFy
         will be reused during iterations
-    '''
+    """
     w, h = x.shape[-2:]
     FB = p2o(k.repeat(1, 1, 1, 1), (w * sf, h * sf))
     FBC = cconj(FB, inplace=False)
@@ -208,9 +218,8 @@ def pre_calculate_prox(x, k, sf):
     return FB, FBC, F2B, FBFy
 
 
-
 def pre_calculate_grad(x, k, sf):
-    '''
+    """
     Args:
         x: NxCxHxW, LR input
         k: Nx1xhxw
@@ -219,14 +228,13 @@ def pre_calculate_grad(x, k, sf):
     Returns:
 
         will be reused during iterations
-    '''
-    STx = upsample(x,sf=sf)
+    """
+    STx = upsample(x, sf=sf)
     return
 
 
-
 def prox_solution_L2(x, FB, FBC, F2B, FBFy, stepsize, sf):
-    alpha = torch.tensor([1/stepsize]).repeat(1, 1, 1, 1).to(x.device)
+    alpha = torch.tensor([1 / stepsize]).repeat(1, 1, 1, 1).to(x.device)
     FR = FBFy + fft(alpha * x)
     x1 = cmul(FB, FR)
     FBR = torch.mean(splits(x1, sf), dim=-1, keepdim=False)
@@ -236,10 +244,10 @@ def prox_solution_L2(x, FB, FBC, F2B, FBFy, stepsize, sf):
     FX = (FR - FCBinvWBR) / alpha.unsqueeze(-1)
     Xest = ifft(FX)
     return Xest
-    
+
 
 def Wiener_filter(x, k, stepsize, sf):
-    alpha = torch.tensor([1/stepsize]).repeat(1, 1, 1, 1).to(x.device)
+    alpha = torch.tensor([1 / stepsize]).repeat(1, 1, 1, 1).to(x.device)
     w, h = x.shape[-2:]
     FB = p2o(k.repeat(1, 1, 1, 1), (w * sf, h * sf))
     FBC = cconj(FB, inplace=False)
@@ -260,7 +268,7 @@ def Wiener_filter(x, k, stepsize, sf):
 def grad_solution_L2_fft(x, FB, FBC, FBFy, sf):
     FBFx = cmul(FB, fft(x))
     kx = ifft(FBFx)
-    AFx = downsample(ifft(FBFx),sf=sf)
+    AFx = downsample(ifft(FBFx), sf=sf)
     STAFx = upsample(AFx, sf=sf)
     ATAFx = cmul(FBC, fft(STAFx))
     FX = ATAFx - FBFy
@@ -269,36 +277,37 @@ def grad_solution_L2_fft(x, FB, FBC, FBFy, sf):
 
 
 def grad_solution_L2(x, y, k, sf):
-    '''
+    """
     Gradient of the L2 data fidelity term.
 
     x: image, NxcxHxW
     y: image, NxcxHxW
     k: kernel, hxw
     sf: scale factor
-    '''
-    I = G(x, k, sf=sf)-y
+    """
+    I = G(x, k, sf=sf) - y
     return Gt(I, k, sf=sf)
 
+
 def grad_solution_KL(x, y, k, sf, alpha):
-    '''
+    """
     Gradient of the KL data fidelity term.
 
     x: image, NxcxHxW
     y: image, NxcxHxW
     k: kernel, hxw
     sf: scale factor
-    '''
-    I = torch.ones_like(x) - y/G(x, k, sf=sf)
+    """
+    I = torch.ones_like(x) - y / G(x, k, sf=sf)
     grad = Gt(I, k, sf=sf)
     return grad
 
 
-'''
+"""
 # =================
 PyTorch
 # =================
-'''
+"""
 
 
 def real2complex(x):
@@ -306,23 +315,23 @@ def real2complex(x):
 
 
 def modcrop(img, sf):
-    '''
+    """
     img: tensor image, NxCxWxH or CxWxH or WxH
     sf: scale factor
-    '''
+    """
     w, h = img.shape[-2:]
     im = img.clone()
-    return im[..., :w - w % sf, :h - h % sf]
+    return im[..., : w - w % sf, : h - h % sf]
 
 
 def circular_pad(x, pad):
-    '''
+    """
     # x[N, 1, W, H] -> x[N, 1, W + 2 pad, H + 2 pad] (pariodic padding)
-    '''
+    """
     x = torch.cat([x, x[:, :, 0:pad, :]], dim=2)
     x = torch.cat([x, x[:, :, :, 0:pad]], dim=3)
-    x = torch.cat([x[:, :, -2 * pad:-pad, :], x], dim=2)
-    x = torch.cat([x[:, :, :, -2 * pad:-pad], x], dim=3)
+    x = torch.cat([x[:, :, -2 * pad : -pad, :], x], dim=2)
+    x = torch.cat([x[:, :, :, -2 * pad : -pad], x], dim=3)
     return x
 
 
@@ -344,15 +353,22 @@ def pad_circular(input, padding):
 
 def dim_pad_circular(input, padding, dimension):
     # type: (Tensor, int, int) -> Tensor
-    input = torch.cat([input, input[[slice(None)] * (dimension - 1) +
-                                    [slice(0, padding)]]], dim=dimension - 1)
-    input = torch.cat([input[[slice(None)] * (dimension - 1) +
-                             [slice(-2 * padding, -padding)]], input], dim=dimension - 1)
+    input = torch.cat(
+        [input, input[[slice(None)] * (dimension - 1) + [slice(0, padding)]]],
+        dim=dimension - 1,
+    )
+    input = torch.cat(
+        [
+            input[[slice(None)] * (dimension - 1) + [slice(-2 * padding, -padding)]],
+            input,
+        ],
+        dim=dimension - 1,
+    )
     return input
 
 
-def unpad_circular(input,padding):
-    ph,pw = padding
+def unpad_circular(input, padding):
+    ph, pw = padding
     out = input[:, :, ph:-ph, pw:-pw]
     # sides
     out[:, :, :ph, :] += input[:, :, -ph:, pw:-pw]
@@ -368,20 +384,20 @@ def unpad_circular(input,padding):
 
 
 def imfilter(x, k, transposed=False, n_channel=3):
-    '''
+    """
     Equivalent (verified) to scipy ndimage.convolve with mode='wrap'.
     x: image, NxcxHxW
     k: kernel, hxw
-    '''
+    """
     n_channel = x.shape[1]
     k = k.repeat(n_channel, 1, 1, 1)
-    k = k.flip(-1).flip(-2) # flip kernel for convolution and not correlation !!!
-    ph = (k.shape[-2] - 1)//2
-    pw = (k.shape[-1] - 1)//2
+    k = k.flip(-1).flip(-2)  # flip kernel for convolution and not correlation !!!
+    ph = (k.shape[-2] - 1) // 2
+    pw = (k.shape[-1] - 1) // 2
     if not transposed:
         x = pad_circular(x, padding=(ph, pw))
         x = F.conv2d(x, k, groups=x.shape[1])
-    else :
+    else:
         x = F.conv_transpose2d(x, k, groups=x.shape[1])
         x = unpad_circular(x, padding=(ph, pw))
     return x
@@ -395,20 +411,20 @@ def imfilter(x, k, transposed=False, n_channel=3):
 
 
 def bicubic_degradation(x, sf=3):
-    '''
+    """
     Args:
         x: HxWxC image, [0, 1]
         sf: down-scale factor
 
     Return:
         bicubicly downsampled LR image
-    '''
+    """
     x = util.imresize_np(x, scale=1 / sf)
     return x
 
 
 def numpy_degradation(x, k, sf=3):
-    ''' blur + downsampling
+    """ blur + downsampling
 
     Args:
         x: HxWxC image, [0, 1]/[0, 255]
@@ -417,8 +433,8 @@ def numpy_degradation(x, k, sf=3):
 
     Return:
         downsampled LR image
-    '''
-    x = ndimage.filters.convolve(x, np.expand_dims(k, axis=2), mode='wrap')
+    """
+    x = ndimage.filters.convolve(x, np.expand_dims(k, axis=2), mode="wrap")
     # x = filters.correlate(x, np.expand_dims(np.flip(k), axis=2))
     st = 0
     return x[st::sf, st::sf, ...]
@@ -451,4 +467,3 @@ def shift_pixel(x, sf, upper_left=True):
             x[:, :, i] = interp2d(xv, yv, x[:, :, i])(x1, y1)
 
     return x
-
