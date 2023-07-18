@@ -25,9 +25,9 @@ def get_poisson_noise_parameters(
 ):
     if PnP_algo == "GD":
         if bregman_potential == "burg":
-            sigma_denoiser_pre_init = 50
+            sigma_denoiser_pre_init = 1 / 50
             stepsize_pre_init = 1.0
-            sigma_denoiser = 500
+            sigma_denoiser = 1 / 500
             lim_init = 100
             stepsize = 0.05
             alpha = 1.
@@ -73,11 +73,13 @@ def get_poisson_noise_parameters(
                 stepsize = 1.0
                 alpha = 1.
             else:
-                sigma_denoiser_pre_init = 50
-                sigma_denoiser = 500
+                sigma_denoiser_pre_init = 1 / 50
+                sigma_denoiser = 1 / 500
                 lim_init = 100
                 lamb = 0.025
                 alpha = 0.05
+                stepsize_pre_init = 1.0
+                stepsize = 1.
                 if alpha_poisson == 5:
                     lamb_pre_init = 0.5
                 if alpha_poisson == 10:

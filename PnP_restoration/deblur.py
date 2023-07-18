@@ -16,7 +16,7 @@ from utils.utils_restoration import (
     imsave,
 )
 from natsort import os_sorted
-from prox_PnP_restoration import PnP_restoration
+from BPnP_restoration import PnP_restoration
 import wandb
 from utils.utils_sr import Wiener_filter
 import torch
@@ -132,7 +132,6 @@ def deblur():
                     input_im = np.expand_dims(input_im, axis=2)
                 # Degrade image
                 blur_im = ndimage.convolve(input_im, np.expand_dims(k, axis=2), mode="wrap")
-
                 np.random.seed(seed=0)
                 blur_im = (
                         np.random.poisson(

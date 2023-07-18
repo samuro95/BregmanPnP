@@ -331,7 +331,7 @@ class PnP_restoration:
             F_old = F
             f_old = f
 
-            if self.hparams.PnP_algo == "GD_RED":
+            if self.hparams.PnP_algo == "GD":
                 # Gradient of the data fidelity term
                 Df = self.data_fidelity_grad(x_old, img_tensor)
                 # Gradient of the regularization term
@@ -831,7 +831,7 @@ class PnP_restoration:
             "--no_linear_init", dest="use_linear_init", action="store_false"
         )
         parser.set_defaults(use_linear_init=True)
-        parser.add_argument("--bregman_potential", type=str, default="L2")
+        parser.add_argument("--bregman_potential", type=str, default="burg")
         parser.add_argument("--C_max", type=float, default=1.0)
         parser.add_argument("--grayscale", dest="grayscale", action="store_true")
         parser.set_defaults(grayscale=False)
