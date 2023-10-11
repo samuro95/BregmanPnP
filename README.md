@@ -27,7 +27,7 @@ The model is trained to denoiser Inverse Gamma noise with parameter $\gamma$. Th
 
 Checkpoints, tensorboard events and hyperparameters will be saved in the ```GS_denoising/logs/experiment_name``` subfolder. 
 
-### Testing 
+### Testing of the denoiser
 
 - For directly testing the model, download  [pretrained checkpoint](https://plmbox.math.cnrs.fr/f/c5574b42bdc146d08844/?dl=1) and save it as ```GS_denoising/ckpts/inv_gamma.ckpt```
 - For denoising a set of (clean) images. Place your images in a directory of the form ```datasets/DATASET_NAME/0/```. 
@@ -39,7 +39,7 @@ python main_test.py --gamma_list_test 50, 75, 100 -- dataset_name DATASET_NAME
 Datasets CBSD68, CBSD10, set3c are already present in the directory. Default value is CBSD10. 
 
 
-## Bregman PnP and RED for Poisson image deblurring 
+### Bregman PnP and RED for Poisson image deblurring 
 
 - Download  [pretrained checkpoint](https://plmbox.math.cnrs.fr/f/c5574b42bdc146d08844/?dl=1) and save it as ```GS_denoising/ckpts/inv_gamma.ckpt``` .
 
