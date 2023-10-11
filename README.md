@@ -1,8 +1,8 @@
 # Convergent Bregman Plug-and-Play Image Restoration for Poisson Inverse Problems
 
-[[Paper](https://arxiv.org/pdf/2306.03466.pdf)]
+Implementation of the [paper](https://arxiv.org/pdf/2306.03466.pdf)] "Convergent Bregman Plug-and-Play Image Restoration for Poisson Inverse Problems" presented at Neurips 2023. 
 
-[Samuel Hurault](https://www.math.u-bordeaux.fr/~shurault/), [Arthur Leclaire](https://www.math.u-bordeaux.fr/~aleclaire/), [Nicolas Papadakis](https://www.math.u-bordeaux.fr/~npapadak/). \
+[Samuel Hurault]([https://www.math.u-bordeaux.fr/~shurault/](https://samuelhurault.netlify.app/)), [Arthur Leclaire](https://www.math.u-bordeaux.fr/~aleclaire/), [Nicolas Papadakis](https://www.math.u-bordeaux.fr/~npapadak/). \
 [Institut de Mathématiques de Bordeaux](https://www.math.u-bordeaux.fr/imb/spip.php), France.
 
 
